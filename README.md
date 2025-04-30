@@ -14,7 +14,7 @@ A typical work-stealing scheduler classifies each processor as either working or
 
 ### Implementation Details
 
-* The C++ [ParlayLib](https://github.com/cmuparlay/parlaylib/tree/master) library was used for performing all our experiments and investigations of a high-performance elastic work-stealing scheduler. As part of this investigation, various modifications were made to ```scheduler.h``` (contained in ```./include/parlay/```).
+* The C++ [parlaylib](https://github.com/cmuparlay/parlaylib/tree/master) library was used for performing all our experiments and investigations of a high-performance elastic work-stealing scheduler. As part of this investigation, various modifications were made to ```scheduler.h``` (contained in ```./include/parlay/```).
 * The C++ [spdlog](https://github.com/gabime/spdlog/tree/v1.x) library was used for fast logging in a parallel environment.
 * Various experiments contained under ```./experiments``` were created and performed for analysing the behaviour of different parallel benchmarks.
 * Further, experiments contained under ```./sleep_estimation``` were performed to estimate the duration of putting a processor to sleep and waking it up.
@@ -34,9 +34,9 @@ A typical work-stealing scheduler classifies each processor as either working or
 This plot summarizes various performance metrics and contains 4 sub-plots as follows:
 
     1. Number of threads vs Utilization Ratio: This sub-plot contains the number of threads on the x-axis and the Utilization Ratio on the y-axis. The Utilization Ratio is computed as the ratio of (Working Time) to (Working Time + Stealing Time + Sleeping Time).
-    1. Number of threads vs Successful Steal Ratio: This sub-plot contains the number of threads on the x-axis and the Successful Steal Ratio on the y-axis. The Successful Steal Ratio is computed as the ratio of (number of Successful Steals) to (Total number of Steal Attempts).
-    1. Number of threads vs Burn Ratio: This sub-plot contains the number of threads on the x-axis and the Burn Ratio on the y-axis. The Burn Ratio is computed as the ratio of (Working Time + Stealing Time) to (Working Time).
-    1. Box plot for Steal Times (Min, Max, Avg) per Thread: This sub-plot contains the number of threads on the x-axis and the Steal Times on the y-axis. Each box plot represents the Minimum, Maximum, and Average of the Steal Times for a particular execution of the experiment with 'x' number of threads.
+    2. Number of threads vs Successful Steal Ratio: This sub-plot contains the number of threads on the x-axis and the Successful Steal Ratio on the y-axis. The Successful Steal Ratio is computed as the ratio of (number of Successful Steals) to (Total number of Steal Attempts).
+    3. Number of threads vs Burn Ratio: This sub-plot contains the number of threads on the x-axis and the Burn Ratio on the y-axis. The Burn Ratio is computed as the ratio of (Working Time + Stealing Time) to (Working Time).
+    4. Box plot for Steal Times (Min, Max, Avg) per Thread: This sub-plot contains the number of threads on the x-axis and the Steal Times on the y-axis. Each box plot represents the Minimum, Maximum, and Average of the Steal Times for a particular execution of the experiment with 'x' number of threads.
 
 **Prefix_Sum_Plot.png**
 
