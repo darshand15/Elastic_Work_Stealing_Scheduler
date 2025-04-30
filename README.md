@@ -32,10 +32,11 @@ A typical work-stealing scheduler classifies each processor as either working or
 **Metrics_Plot.png**
 
 This plot summarizes various performance metrics and contains 4 sub-plots as follows:
-    1. Number of threads vs Utilization Ratio: This sub-plot contains the number of threads on the x-axis and the Utilization Ratio on the y-axis. The Utilization Ratio is computed as the ratio of (Working Time) to (Working Time + Stealing Time + Sleeping Time).
-    2. Number of threads vs Successful Steal Ratio: This sub-plot contains the number of threads on the x-axis and the Successful Steal Ratio on the y-axis. The Successful Steal Ratio is computed as the ratio of (number of Successful Steals) to (Total number of Steal Attempts).
-    3. Number of threads vs Burn Ratio: This sub-plot contains the number of threads on the x-axis and the Burn Ratio on the y-axis. The Burn Ratio is computed as the ratio of (Working Time + Stealing Time) to (Working Time).
-    4. Box plot for Steal Times (Min, Max, Avg) per Thread: This sub-plot contains the number of threads on the x-axis and the Steal Times on the y-axis. Each box plot represents the Minimum, Maximum, and Average of the Steal Times for a particular execution of the experiment with 'x' number of threads.
+
+1. Number of threads vs Utilization Ratio: This sub-plot contains the number of threads on the x-axis and the Utilization Ratio on the y-axis. The Utilization Ratio is computed as the ratio of (Working Time) to (Working Time + Stealing Time + Sleeping Time).
+2. Number of threads vs Successful Steal Ratio: This sub-plot contains the number of threads on the x-axis and the Successful Steal Ratio on the y-axis. The Successful Steal Ratio is computed as the ratio of (number of Successful Steals) to (Total number of Steal Attempts).
+3. Number of threads vs Burn Ratio: This sub-plot contains the number of threads on the x-axis and the Burn Ratio on the y-axis. The Burn Ratio is computed as the ratio of (Working Time + Stealing Time) to (Working Time).
+4. Box plot for Steal Times (Min, Max, Avg) per Thread: This sub-plot contains the number of threads on the x-axis and the Steal Times on the y-axis. Each box plot represents the Minimum, Maximum, and Average of the Steal Times for a particular execution of the experiment with 'x' number of threads.
 
 **Prefix_Sum_Plot.png**
 
