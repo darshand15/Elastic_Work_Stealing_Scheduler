@@ -14,9 +14,33 @@ A typical work-stealing scheduler classifies each processor as either working or
 
 ### Implementation Details
 
-* The C++ [parlaylib](https://github.com/cmuparlay/parlaylib/tree/master) library was used for performing all our experiments and investigations of a high-performance elastic work-stealing scheduler. As part of this investigation, various modifications were made to ```scheduler.h``` (contained in ```./include/parlay/```).
+* The C++ [parlaylib](https://github.com/cmuparlay/parlaylib/tree/master) library was used for performing all our experiments and investigations of a high-performance elastic work-stealing scheduler. As part of this investigation, various modifications were made to ```scheduler.h``` (contained in ```./include/parlay/```) using different concepts as follows:
+    * A worker thread can be said to be in one of 3 different states, namely, Working, Stealing and Sleeping.
+    * The transitions between these 3 states can be summarized as follows:
+        Working <=> Stealing <=> Sleeping
+    * Working state is the initial state for worker 0.
+    * Stealing state is the initial state for all workers except worker 0.
+    * The general behaviour for these workers is to transition to the stealing state when they have no jobs on their local queue.
+    * Under the stealing state, the workers might perform multiple unsuccesful steals, interleaved with sleeping before there is a successful steal attempt. The experiments performed as part of this research project intend to comprehensively identify this non-working duration (unsuccessful steals interleaved with sleep before a successful steal attempt) and explore if they can instead be modified to durations where the worker/processor is put to sleep to maximize energy savings.
+    * The different states and transitions have been encoded into the scheduler and continuously tracked.
+    * The instrumentation code for timing has been embedded into the scheduler to track these transitions, record appropriate timestamps, and generate logs.
+    * The recorded measurements are accumulated appropriately to generate various performance metrics.
+
 * The C++ [spdlog](https://github.com/gabime/spdlog/tree/v1.x) library was used for fast logging in a parallel environment.
-* Various experiments contained under ```./experiments``` were created and performed for analysing the behaviour of different parallel benchmarks.
+* Various experiments contained under ```./experiments``` were created and performed for analysing the behaviour of different parallel benchmarks as follows:
+    * 1_pardo_seq_loop: Experiments with a single pardo (the fork-join interface in parlaylib) with two long sequential loops.
+    * 2_pardo_seq_loop: Experiments with a single pardo with two long sequential loops having dependencies before and after the pardo.
+    * 3_dummy_init_pardo: Experiments with a dummy init pardo to invoke the scheduler and trigger the instrumentation for timing measurement. This is followed by a single pardo with two long sequential loops having dependencies before and after the pardo.
+    * 4_nested_pardo: Experiments with nested pardo.
+    * 5_par_mergesort: Experiments with parallel mergesort.
+    * 6_bigint: Experiments with parallel addition and subtraction of two arbitrary precision numbers.
+    * 7_primes: Experiments with parallel generation of primes upto n.
+    * 8_bfs: Experiments with parallel bfs traversal of a graph.
+    * 9_triangle_count: Experiments with parallel triangle counting of a graph.
+    * 10_for_large_iter__parfor_med_iter: Experiments with an outer sequential for loop nested with a parallel for inner loop.
+    * 11_parfor_med_iter__for_large_iter: Experiments with a parallel for outer loop nested with a sequential inner loop.
+    * 12_delaunay: Experiments with delaunay triangulation in 2 dimensions.
+    * 13_mergesort_seq_merge: Experiments with parallel mergesort but with sequential merge.
 * Further, experiments contained under ```./sleep_estimation``` were performed to estimate the duration of putting a processor to sleep and waking it up.
 
 ### Running the Experiments
@@ -30,7 +54,7 @@ A typical work-stealing scheduler classifies each processor as either working or
 
 ### Details regarding the generated Graphs
 
-The graphs generated (Metrics_Plot and Prefix_Sum_Plot) for each of the experiments have been placed under the *graph_generation* sub-directory of every *experiment's* directory.
+The graphs generated (*Metrics_Plot* and *Prefix_Sum_Plot*) for each of the experiments have been placed under the *graph_generation* sub-directory of every *experiment's* directory.
 
 **Metrics_Plot.png**
 
@@ -54,3 +78,7 @@ This plot summarizes various performance metrics and contains 4 sub-plots as fol
 * The feasibility percentage noted above each sub-plot is computed as follows: ((summation of the Stop-Start Work durations that exceed the estimated sleep duration) - (estimated sleep duration))/(summation of all the Stop-Start Work durations).
 * Therefore, the feasibility percentage denotes what portion of the non-working time can be effectively utilized for energy savings by putting the workers (processor threads) to sleep given that *estimated sleep duration* is an overhead to put a particular worker to sleep.
 * Therefore, the feasibility percentage coupled with the normalized end point of the prefix sum plot can help in commenting on the viability and quantity of possible energy savings for a particular experiment.
+
+
+### Note:
+It can be noted that as part of this research project, we encountered a race condition in the implementation of the parlaylib scheduler, the details of which have been recorded as part of the following Github issue: https://github.com/cmuparlay/parlaylib/issues/83
