@@ -14,12 +14,20 @@
 #include <type_traits>    // IWYU pragma: keep
 #include <utility>
 #include <vector>
+#include <fstream>
 
 #include "internal/work_stealing_deque.h"         // IWYU pragma: keep
 #include "internal/work_stealing_job.h"
 
 // IWYU pragma: no_include <bits/chrono.h>
 // IWYU pragma: no_include <bits/this_thread_sleep.h>
+
+// #define _GNU_SOURCE
+#include <sys/time.h>
+#include <sys/resource.h>
+
+#include "spdlog/spdlog.h"
+#include "spdlog/sinks/basic_file_sink.h"
 
 
 
@@ -30,7 +38,7 @@
 //
 // Default: true
 #ifndef PARLAY_ELASTIC_PARALLELISM
-#define PARLAY_ELASTIC_PARALLELISM true
+#define PARLAY_ELASTIC_PARALLELISM false
 #endif
 
 
@@ -50,6 +58,12 @@
 
 namespace parlay {
 
+enum Proc_current_state
+{
+  WORKING,
+  STEALING,
+  SLEEPING
+};
 
 template <typename Job>
 struct scheduler {
@@ -112,12 +126,43 @@ struct scheduler {
         deques(num_deques),
         attempts(num_deques),
         spawned_threads(),
-        finished_flag(false) {
+        finished_flag(false){
+
+    // logger_st_pair = spdlog::basic_logger_mt("st_pair_logger", "logs/st_pair.txt");
+    logger_w_pair = spdlog::basic_logger_mt("w_pair_logger", "logs/w_pair.txt");    
+
+    arr_proc_state_info = (proc_state_info*)malloc(num_workers*sizeof(proc_state_info));
+    
+    arr_proc_state_info[0].current_state = -1;
+    arr_proc_state_info[0].tot_working_time = 0;
+    arr_proc_state_info[0].tot_stealing_time = 0;
+    arr_proc_state_info[0].tot_sleeping_time = 0;
+    arr_proc_state_info[0].attempt_steals = 0;
+    arr_proc_state_info[0].succ_steals = 0;
+    arr_proc_state_info[0].min_st_pair = ULLONG_MAX;
+    arr_proc_state_info[0].max_st_pair = 0;
+    arr_proc_state_info[0].st_count = 0;
+    arr_proc_state_info[0].first_working = true;
+    
+    start_working();
 
     // Spawn num_threads many threads on startup
-    for (worker_id_type i = 1; i < num_threads; ++i) {
+    for (worker_id_type i = 1; i < num_threads; ++i) 
+    {
+      arr_proc_state_info[i].current_state = -1;
+      arr_proc_state_info[i].tot_working_time = 0;
+      arr_proc_state_info[i].tot_stealing_time = 0;
+      arr_proc_state_info[i].tot_sleeping_time = 0;
+      arr_proc_state_info[i].attempt_steals = 0;
+      arr_proc_state_info[i].succ_steals = 0;
+      arr_proc_state_info[i].min_st_pair = ULLONG_MAX;
+      arr_proc_state_info[i].max_st_pair = 0;
+      arr_proc_state_info[i].st_count = 0;
+      arr_proc_state_info[i].first_working = true;
+
       spawned_threads.emplace_back([&, i]() {
         worker_info = {i, this};
+        start_stealing();
         worker();
       });
     }
@@ -125,7 +170,12 @@ struct scheduler {
 
   ~scheduler() {
     shutdown();
+    stop_working();
+
+    display_proc_times();
+
     worker_info = std::move(parent_worker_info);
+    free(arr_proc_state_info);
   }
 
   // Push onto local stack.
@@ -148,8 +198,16 @@ struct scheduler {
     // Conservative avoids deadlock if scheduler is used in conjunction
     // with user locks enclosing a wait.
     if (conservative) {
-      while (!done())
-        std::this_thread::yield();
+
+      while (!done()){}
+
+      stop_stealing();
+      start_sleeping();
+
+      std::this_thread::yield();
+
+      stop_sleeping();
+      start_stealing();
     }
     // If not conservative, schedule within the wait.
     // Can deadlock if a stolen job uses same lock as encloses the wait.
@@ -171,6 +229,177 @@ struct scheduler {
     return finished_flag.load(std::memory_order_acquire);
   }
 
+  int get_proc_current_state()
+  {
+    size_t id = worker_id();
+    return arr_proc_state_info[id].current_state;
+  }
+
+  inline void start_working()
+  {
+    size_t id = worker_id();
+    arr_proc_state_info[id].current_state = WORKING;
+    arr_proc_state_info[id].curr_state_started_ts = std::chrono::high_resolution_clock::now();
+
+    if(arr_proc_state_info[id].first_working)
+    {
+      arr_proc_state_info[id].first_working = false;
+    }
+    else
+    {
+      auto duration_log_1 = (std::chrono::time_point_cast<std::chrono::nanoseconds>(arr_proc_state_info[id].prev_stop_working_ts)).time_since_epoch();
+      unsigned long long int duration_log_1_count = static_cast<unsigned long long int>(duration_log_1.count());
+      auto duration_log_2 = (std::chrono::time_point_cast<std::chrono::nanoseconds>(arr_proc_state_info[id].curr_state_started_ts)).time_since_epoch();
+      unsigned long long int duration_log_2_count = static_cast<unsigned long long int>(duration_log_2.count());
+    
+      logger_w_pair->info("{} {}", duration_log_1_count, duration_log_2_count);
+    }
+  }
+
+  inline void stop_working()
+  {
+    auto stop_ts = std::chrono::high_resolution_clock::now();
+    size_t id = worker_id();
+    assert(arr_proc_state_info[id].current_state == WORKING);
+    auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>(stop_ts - arr_proc_state_info[id].curr_state_started_ts);
+    arr_proc_state_info[id].tot_working_time += static_cast<unsigned long long int>(duration.count());
+    arr_proc_state_info[id].prev_stop_working_ts = stop_ts;
+  }
+
+  inline void start_stealing()
+  {
+    size_t id = worker_id();
+    arr_proc_state_info[id].current_state = STEALING;
+    arr_proc_state_info[id].curr_state_started_ts = std::chrono::high_resolution_clock::now();
+  }
+
+  inline void stop_stealing()
+  {
+    auto stop_ts = std::chrono::high_resolution_clock::now();
+    size_t id = worker_id();
+    assert(arr_proc_state_info[id].current_state == STEALING);
+    auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>(stop_ts - arr_proc_state_info[id].curr_state_started_ts);
+    unsigned long long int st_duration_count = static_cast<unsigned long long int>(duration.count());
+    arr_proc_state_info[id].tot_stealing_time += st_duration_count;
+    ++arr_proc_state_info[id].st_count;
+    
+    if(st_duration_count < arr_proc_state_info[id].min_st_pair)
+    {
+      arr_proc_state_info[id].min_st_pair = st_duration_count; 
+    }
+
+    if(st_duration_count > arr_proc_state_info[id].max_st_pair)
+    {
+      arr_proc_state_info[id].max_st_pair = st_duration_count; 
+    }
+
+    auto duration_log_1 = (std::chrono::time_point_cast<std::chrono::nanoseconds>(arr_proc_state_info[id].curr_state_started_ts)).time_since_epoch();
+    unsigned long long int duration_log_1_count = static_cast<unsigned long long int>(duration_log_1.count());
+    auto duration_log_2 = (std::chrono::time_point_cast<std::chrono::nanoseconds>(stop_ts)).time_since_epoch();
+    unsigned long long int duration_log_2_count = static_cast<unsigned long long int>(duration_log_2.count());
+    
+    // logger_st_pair->info("{} {}", duration_log_1_count, duration_log_2_count);
+  }
+
+  inline void start_sleeping()
+  {
+    size_t id = worker_id();
+    arr_proc_state_info[id].current_state = SLEEPING;
+    arr_proc_state_info[id].curr_state_started_ts = std::chrono::high_resolution_clock::now();
+  }
+
+  inline void stop_sleeping()
+  {
+    auto stop_ts = std::chrono::high_resolution_clock::now();
+    size_t id = worker_id();
+    assert(arr_proc_state_info[id].current_state == SLEEPING);
+    auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>(stop_ts - arr_proc_state_info[id].curr_state_started_ts);
+    arr_proc_state_info[id].tot_sleeping_time += static_cast<unsigned long long int>(duration.count());
+  }
+
+  void display_proc_times()
+  {
+    unsigned long long int acc_working_time = 0;
+    unsigned long long int acc_stealing_time = 0;
+    unsigned long long int acc_sleeping_time = 0;
+
+    unsigned long long int acc_stealing_count = 0;
+    unsigned long long int acc_succ_st = 0;
+    unsigned long long int acc_attempt_st = 0;
+    unsigned long long int min_st = ULLONG_MAX;
+    unsigned long long int max_st = 0;
+
+    std::ofstream results_all("Results_all.txt");
+    std::ofstream results_metrics("Results_metrics.txt");
+    std::ofstream par_w_time("Par_w_time.txt");
+
+    // std::cout << "\n";
+    for(int i = 0; i<num_threads; ++i)
+    {
+      acc_working_time += arr_proc_state_info[i].tot_working_time;
+      acc_stealing_time += arr_proc_state_info[i].tot_stealing_time;
+      acc_sleeping_time += arr_proc_state_info[i].tot_sleeping_time;
+
+      acc_stealing_count += arr_proc_state_info[i].st_count;
+      acc_succ_st += arr_proc_state_info[i].succ_steals;
+      acc_attempt_st += arr_proc_state_info[i].attempt_steals;
+
+      if(arr_proc_state_info[i].min_st_pair < min_st)
+      {
+        min_st = arr_proc_state_info[i].min_st_pair;
+      }
+
+      if(arr_proc_state_info[i].max_st_pair > max_st)
+      {
+        max_st = arr_proc_state_info[i].max_st_pair;
+      }
+
+      results_all << "Thread " << i << ": " << arr_proc_state_info[i].tot_working_time << ", " << arr_proc_state_info[i].tot_stealing_time << ", " << arr_proc_state_info[i].tot_sleeping_time << "\n";
+    }
+
+    double util = acc_working_time/(double)(acc_working_time + acc_stealing_time + acc_sleeping_time);
+    double burn_r = (acc_working_time + acc_stealing_time)/(double)(acc_working_time);
+
+    double succ_st_r = 0.0;
+    double avg_st_pair = 0.0;
+
+    if(acc_attempt_st != 0)
+    {
+      succ_st_r = acc_succ_st/(double)(acc_attempt_st);
+    }
+
+    if(acc_stealing_count != 0)
+    {
+      avg_st_pair = acc_stealing_time/(double)(acc_stealing_count);
+    }
+    else
+    {
+      min_st = 0;
+      max_st = 0;
+    }
+
+    results_all << "\nNumber of threads: " << num_threads << "\n\n";
+    results_all << "Parallel Working Time: " << acc_working_time << " nanoseconds\n";
+    results_all << "Parallel Stealing Time: " << acc_stealing_time << " nanoseconds\n";
+    results_all << "Parallel Sleeping Time: " << acc_sleeping_time << " nanoseconds\n";
+    results_all << "Utilization: " << util << "\n";
+    results_all << "Burn Ratio: " << burn_r << "\n";
+    results_all << "Successful Steal Ratio: " << succ_st_r << "\n";
+    results_all << "Steal Pair Min: " << min_st << "\n";
+    results_all << "Steal Pair Max: " << max_st << "\n";
+    results_all << "Steal Pair Avg: " << avg_st_pair << "\n";
+
+    results_all << "num_th, W, St, Sl, Util, Succ_st_r, Burn_r, St_pair_min, St_pair_max, St_pair_avg: " << num_threads << ", " << acc_working_time << ", " << acc_stealing_time << ", " << acc_sleeping_time << ", " << util << ", " << succ_st_r << ", " << burn_r << ", " << min_st << ", " << max_st << ", " << avg_st_pair << "\n";
+    results_all << "num_th, Util, Succ_st_r, Burn_r, St_pair_min, St_pair_max, St_pair_avg: " << num_threads << ", " << util << ", " << succ_st_r << ", " << burn_r << ", " << min_st << ", " << max_st << ", " << avg_st_pair << "\n\n";
+
+    results_metrics << num_threads << "," << util << "," << succ_st_r << "," << burn_r << "," << min_st << "," << max_st << "," << avg_st_pair << "\n";
+    par_w_time << acc_working_time << "\n";
+
+    results_all.close();
+    results_metrics.close();
+
+  }
+
  private:
   // Align to avoid false sharing.
   struct alignas(128) attempt {
@@ -188,6 +417,45 @@ struct scheduler {
   std::atomic<size_t> wake_up_counter{0};
   std::atomic<size_t> num_finished_workers{0};
 
+  // struct alignas(64) proc_state_info
+  struct proc_state_info
+  {
+    int current_state; // WORKING, STEALING or SLEEPING
+    unsigned long long int tot_working_time;
+    unsigned long long int tot_stealing_time;
+    unsigned long long int tot_sleeping_time;
+    std::chrono::time_point<std::chrono::high_resolution_clock> curr_state_started_ts;
+    unsigned long long int succ_steals;
+    unsigned long long int attempt_steals;
+    unsigned long long int min_st_pair;
+    unsigned long long int max_st_pair;
+    unsigned long long int st_count;
+    std::chrono::time_point<std::chrono::high_resolution_clock> prev_stop_working_ts;
+    bool first_working;
+
+    proc_state_info()
+    {
+      current_state = -1;
+      tot_working_time = 0;
+      tot_stealing_time = 0;
+      tot_sleeping_time = 0;
+      curr_state_started_ts = 0;
+      succ_steals = 0;
+      attempt_steals = 0;
+      min_st_pair = ULLONG_MAX;
+      max_st_pair = 0;
+      st_count = 0;
+      prev_stop_working_ts = 0;
+      first_working = true;
+      // std::cout << "proc_state_info ctor called\n";
+    }
+  };
+  typedef struct proc_state_info proc_state_info;
+  proc_state_info* arr_proc_state_info = NULL;
+
+  std::shared_ptr<spdlog::logger> logger_st_pair;
+  std::shared_ptr<spdlog::logger> logger_w_pair;
+
   // Start an individual worker task, stealing work if no local
   // work is available. May go to sleep if no work is available
   // for a long time, until woken up again when notified that
@@ -198,7 +466,16 @@ struct scheduler {
 #endif
     while (!finished()) {
       Job* job = get_job([&]() { return finished(); }, PARLAY_ELASTIC_PARALLELISM);
-      if (job)(*job)();
+      if (job)
+      {
+        stop_stealing();
+        start_working();
+
+        (*job)();
+
+        stop_working();
+        start_stealing();
+      }
 #if PARLAY_ELASTIC_PARALLELISM
       else if (!finished()) {
         // If no job was stolen, the worker should go to
@@ -223,7 +500,14 @@ struct scheduler {
     while (true) {
       Job* job = get_job(done, false);  // timeout MUST BE false
       if (!job) return;
+
+      stop_stealing();
+      start_working();
+
       (*job)();
+
+      stop_working();
+      start_stealing();
     }
     assert(done());
   }
@@ -255,10 +539,26 @@ struct scheduler {
       // By coupon collector's problem, this should touch all.
       for (size_t i = 0; i <= YIELD_FACTOR * num_deques; i++) {
         if (break_early()) return nullptr;
+
         Job* job = try_steal(id);
-        if (job) return job;
+
+        ++arr_proc_state_info[id].attempt_steals;
+
+        if (job)
+        {
+          ++arr_proc_state_info[id].succ_steals;
+          return job;
+        } 
       }
+
+      stop_stealing();
+      start_sleeping();
+
       std::this_thread::sleep_for(std::chrono::nanoseconds(num_deques * 100));
+
+      stop_sleeping();
+      start_stealing();
+      
     } while (!timeout || std::chrono::steady_clock::now() - start_time < STEAL_TIMEOUT);
     return nullptr;
   }
@@ -295,9 +595,19 @@ struct scheduler {
   
   // Wait until notified to wake up
   void wait_for_work() {
+
+    stop_stealing();
+    start_sleeping();
+
+    auto orig = wake_up_counter.load();
     num_awake_workers.fetch_sub(1);
-    parlay::atomic_wait(&wake_up_counter, wake_up_counter.load());
+
+    parlay::atomic_wait(&wake_up_counter, orig);
     num_awake_workers.fetch_add(1);
+
+    stop_sleeping();
+    start_stealing();
+  
   }
 
 #endif
@@ -335,18 +645,39 @@ class fork_join_scheduler {
 
   // Fork two thunks and wait until they both finish.
   template <typename L, typename R>
-  static void pardo(scheduler_t& scheduler, L&& left, R&& right, bool conservative = false) {
+  static void pardo(scheduler_t& scheduler, L&& left, R&& right, bool conservative = false) 
+  {
+    assert(scheduler.get_proc_current_state() == WORKING);
+
     auto execute_right = [&]() { std::forward<R>(right)(); };
     auto right_job = make_job(right);
     scheduler.spawn(&right_job);
+
+    struct rusage usage;
+    struct timeval start_utime, end_utime;
+    struct timeval start_stime, end_stime;
+    size_t duration_utime_w = 0;
+    size_t duration_stime_w = 0;
+
     std::forward<L>(left)();
-    if (const Job* job = scheduler.get_own_job(); job != nullptr) {
+
+    if (const Job* job = scheduler.get_own_job(); job != nullptr) 
+    {
       assert(job == &right_job);
       execute_right();
     }
-    else {
+    else 
+    {
       auto done = [&]() { return right_job.finished(); };
+
+      scheduler.stop_working();
+      scheduler.start_stealing();
+
       scheduler.wait_until(done, conservative);
+
+      scheduler.stop_stealing();
+      scheduler.start_working();
+
       assert(right_job.finished());
     }
   }
