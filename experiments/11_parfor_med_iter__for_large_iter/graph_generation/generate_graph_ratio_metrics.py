@@ -12,7 +12,6 @@ avg_steal_time = []
 
 
 for filename in sorted(os.listdir("../gen_results_metrics"), key = lambda f: (int)((f.split('_')[4]).split('.')[0])):
-    print(filename)
     file_path = os.path.join("../gen_results_metrics", filename)
     if os.path.isfile(file_path) and filename.lower().endswith((".log", ".txt")):
         with open(file_path, 'r') as file:
