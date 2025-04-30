@@ -6,7 +6,7 @@
 
 ### Introduction
 
-This Research Project under the mentorship of Prof. Samuel Westrick set out to answer the question: “In a modern high-performance work-stealing scheduler, when a processor is idle, how long is it typically idle for?” The insights gleaned from our attempts to answer this question would help in deducing the possible energy savings for a real-world application.
+This Research Project under the mentorship of Prof. Samuel Westrick set out to answer the question: *“In a modern high-performance work-stealing scheduler, when a processor is idle, how long is it typically idle for?”* The insights gleaned from our attempts to answer this question would help in deducing the possible energy savings for a real-world application.
 
 ### Motivation
 
@@ -15,7 +15,7 @@ A typical work-stealing scheduler classifies each processor as either working or
 ### Implementation Details
 
 * The C++ [ParlayLib](https://github.com/cmuparlay/parlaylib/tree/master) library was used for performing all our experiments and investigations of a high-performance elastic work-stealing scheduler. As part of this investigation, various modifications were made to ```scheduler.h``` (contained in ```./include/parlay/```).
-* The C++ [spdlog] (https://github.com/gabime/spdlog/tree/v1.x) library was used for fast logging in a parallel environment.
+* The C++ [spdlog](https://github.com/gabime/spdlog/tree/v1.x) library was used for fast logging in a parallel environment.
 * Various experiments contained under ```./experiments``` were created and performed for analysing the behaviour of different parallel benchmarks.
 * Further, experiments contained under ```./sleep_estimation``` were performed to estimate the duration of putting a processor to sleep and waking it up.
 
@@ -31,7 +31,7 @@ A typical work-stealing scheduler classifies each processor as either working or
 
 **Metrics_Plot.png**
 
-* This plot summarizes various performance metrics and contains 4 sub-plots as follows:
+This plot summarizes various performance metrics and contains 4 sub-plots as follows:
 
     1. Number of threads vs Utilization Ratio: This sub-plot contains the number of threads on the x-axis and the Utilization Ratio on the y-axis. The Utilization Ratio is computed as the ratio of (Working Time) to (Working Time + Stealing Time + Sleeping Time).
     1. Number of threads vs Successful Steal Ratio: This sub-plot contains the number of threads on the x-axis and the Successful Steal Ratio on the y-axis. The Successful Steal Ratio is computed as the ratio of (number of Successful Steals) to (Total number of Steal Attempts).
