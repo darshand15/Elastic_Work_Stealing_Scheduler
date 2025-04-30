@@ -16,10 +16,10 @@ A typical work-stealing scheduler classifies each processor as either working or
 
 * The C++ [parlaylib](https://github.com/cmuparlay/parlaylib/tree/master) library was used for performing all our experiments and investigations of a high-performance elastic work-stealing scheduler. As part of this investigation, various modifications were made to ```scheduler.h``` (contained in ```./include/parlay/```) using different concepts as follows:
     * A worker thread can be said to be in one of 3 different states, namely, Working, Stealing and Sleeping.
-    * The transitions between these 3 states can be summarized as follows:
+    * The transitions between these 3 states can be summarized as follows:  
     Working <=> Stealing <=> Sleeping
-    * Working state is the initial state for worker 0.
-    * Stealing state is the initial state for all workers except worker 0.
+    * The Working state is the initial state for worker 0.
+    * The Stealing state is the initial state for all workers except worker 0.
     * The general behaviour for these workers is to transition to the stealing state when they have no jobs on their local queue.
     * Under the stealing state, the workers might perform multiple unsuccesful steals, interleaved with sleeping before there is a successful steal attempt. The experiments performed as part of this research project intend to comprehensively identify this non-working duration (unsuccessful steals interleaved with sleep before a successful steal attempt) and explore if they can instead be modified to durations where the worker/processor is put to sleep to maximize energy savings.
     * The different states and transitions have been encoded into the scheduler and continuously tracked.
