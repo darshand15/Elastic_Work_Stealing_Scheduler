@@ -21,7 +21,7 @@ A typical work-stealing scheduler classifies each processor as either working or
     * The Working state is the initial state for worker 0.
     * The Stealing state is the initial state for all workers except worker 0.
     * The general behaviour for these workers is to transition to the stealing state when they have no jobs on their local queue.
-    * Under the stealing state, the workers might perform multiple unsuccesful steals, interleaved with sleeping before there is a successful steal attempt. The experiments performed as part of this research project intend to comprehensively identify this non-working duration (unsuccessful steals interleaved with sleep before a successful steal attempt) and explore if they can instead be modified to durations where the worker/processor is put to sleep to maximize energy savings.
+    * Under the stealing state, the workers might perform multiple unsuccessful steals, interleaved with sleeping, before there is a successful steal attempt. The experiments performed as part of this research project intend to comprehensively identify this non-working duration (unsuccessful steals interleaved with sleep before a successful steal attempt) and explore if they can instead be modified to durations where the worker/processor is put to sleep to maximize energy savings.
     * The different states and transitions have been encoded into the scheduler and continuously tracked.
     * The instrumentation code for timing has been embedded into the scheduler to track these transitions, record appropriate timestamps, and generate logs.
     * The recorded measurements are accumulated appropriately to generate various performance metrics.
@@ -34,7 +34,7 @@ A typical work-stealing scheduler classifies each processor as either working or
     * 4_nested_pardo: Experiments with nested pardo.
     * 5_par_mergesort: Experiments with parallel mergesort.
     * 6_bigint: Experiments with parallel addition and subtraction of two arbitrary precision numbers.
-    * 7_primes: Experiments with parallel generation of primes upto n.
+    * 7_primes: Experiments with parallel generation of primes up to n.
     * 8_bfs: Experiments with parallel bfs traversal of a graph.
     * 9_triangle_count: Experiments with parallel triangle counting of a graph.
     * 10_for_large_iter__parfor_med_iter: Experiments with an outer sequential for loop nested with a parallel for inner loop.
@@ -70,15 +70,17 @@ This plot summarizes various performance metrics and contains 4 sub-plots as fol
 * This plot summarizes the prefix sums of the Stop-Start Work duration for different executions of the experiment with different number of threads (1,2,4,8,16,32).
 * The Stop-Start Work duration corresponds to the difference between the timestamp of the start/beginning of the *(i+1)*<sup>th</sup> working phase and the timestamp of the stop/end of the *i*<sup>th</sup> working phase.
 * The x-axis represents the above Stop-Start Work durations in nanoseconds in sorted order
-* The y-axis represents an accumulation of Stop-Start Work duration until a particular point (similar to the prefix sum concept which is the reason for the name of the plot). Infact, the prefix sum is normalized by dividing by the total working time of the experiment using 1 thread.
+* The y-axis represents an accumulation of Stop-Start Work duration until a particular point (similar to the prefix sum concept, which is the reason for the name of the plot). In fact, the prefix sum is normalized by dividing by the total working time of the experiment using 1 thread.
 * Therefore, a particular point in the graph can be interpreted as showing the prefix sum of the Stop-Start Work durations until and including the duration denoted by the x co-ordinate for this point under consideration
 * The rationale for generating a prefix sum plot was to clearly depict and visualize where the actual Stop-Start Work durations are recorded. Given that the total number of such Stop-Start Work durations can be significantly high and their range can be considerably large, it would be hard to effectively visualize these Stop-Start Work durations if it weren't for a prefix sum plot.
-* The reason for normalizing the prefix sum values by dividing by the total working time of the experiment using 1 thread was to be able to comment on the contribution of the non-working time in relation to the working time for 1 thread. As the end of the prefix sum plot corresponds to the sum of all the Stop-Start Work durations, the normalized value of this point denotes the contribution of the non-working time in relation to the working time for the experiment. 
-* The red dotted line in each of the sub-plots denotes the estimated sleep duration (gathered from *sleep_estimation* experiments).
-* The feasibility percentage noted above each sub-plot is computed as follows: ((summation of the Stop-Start Work durations that exceed the estimated sleep duration) - (estimated sleep duration))/(summation of all the Stop-Start Work durations).
-* Therefore, the feasibility percentage denotes what portion of the non-working time can be effectively utilized for energy savings by putting the workers (processor threads) to sleep given that *estimated sleep duration* is an overhead to put a particular worker to sleep.
-* Therefore, the feasibility percentage coupled with the normalized end point of the prefix sum plot can help in commenting on the viability and quantity of possible energy savings for a particular experiment.
+* The reason for normalizing the prefix sum values by dividing by the total working time of the experiment using 1 thread was to be able to comment on the contribution of the non-working time in relation to the working time for 1 thread. As the end of the prefix sum plot corresponds to the sum of all the Stop-Start Work durations, the normalized value of this point denotes the contribution of the non-working time in relation to the working time for the experiment.
+* It can be noted and reiterated that the area under the Prefix Sum Plot has no meaning. 
+* The red dotted line in each sub-plot denotes the estimated sleep duration (gathered from *sleep_estimation* experiments).
+* The feasibility percentage noted above each sub-plot is computed as follows:
 
+  $\frac{(Summation\ of\ the\ Stop\ to\ Start\ Work\ durations\ that\ exceed\ the\ estimated\ sleep\ duration) - (Estimated\ sleep\ duration)}{(Summation\ of\ all\ the\ Stop\ to\ Start\ Work\ durations)}$
+* Therefore, the feasibility percentage denotes what portion of the non-working time can be effectively utilized for energy savings by putting the workers (processor threads) to sleep, given that *estimated sleep duration* is an overhead to put a particular worker to sleep.
+* Therefore, the feasibility percentage coupled with the normalized endpoint of the prefix sum plot can help in commenting on the viability and quantity of possible energy savings for a particular experiment.
 
 ### Note:
-It can be noted that as part of this research project, a race condition in the implementation of the parlaylib scheduler was encountered, the details of which have been recorded as part of the following Github issue: https://github.com/cmuparlay/parlaylib/issues/83
+It can be noted that as part of this research project, a race condition in the implementation of the parlaylib scheduler was encountered, the details of which have been recorded as part of the following GitHub issue: https://github.com/cmuparlay/parlaylib/issues/83
