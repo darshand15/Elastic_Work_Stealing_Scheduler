@@ -596,18 +596,57 @@ struct scheduler {
   // Wait until notified to wake up
   void wait_for_work() {
 
-    stop_stealing();
-    start_sleeping();
+    // stop_stealing();
+    // start_sleeping();
 
     auto orig = wake_up_counter.load();
     num_awake_workers.fetch_sub(1);
 
-    parlay::atomic_wait(&wake_up_counter, orig);
-    num_awake_workers.fetch_add(1);
+    // DO ONE ROUND OF STEALS
+    //   - if found job, then:
+    //     increment num_awake_workers, and DON'T atomic_wait. start working on job
+    //   - if no job found:
+    //     continue to atomic_wait
 
-    stop_sleeping();
-    start_stealing();
-  
+    size_t id = worker_id();
+    Job* job = nullptr;
+    for (size_t i = 0; i <= YIELD_FACTOR * num_deques; i++) 
+    {
+      // if (break_early()) return nullptr;
+
+      job = try_steal(id);
+
+      ++arr_proc_state_info[id].attempt_steals;
+
+      if(job)
+      {
+        ++arr_proc_state_info[id].succ_steals;
+        num_awake_workers.fetch_add(1);
+
+        stop_stealing();
+        start_working();
+
+        (*job)();
+
+        stop_working();
+        start_stealing();
+
+        break;
+      } 
+    }
+
+    if(!job)
+    {
+      stop_stealing();
+      start_sleeping();
+
+      parlay::atomic_wait(&wake_up_counter, orig);
+      num_awake_workers.fetch_add(1);
+
+      stop_sleeping();
+      start_stealing();
+    }
+    
   }
 
 #endif
