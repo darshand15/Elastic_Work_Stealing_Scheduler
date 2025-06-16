@@ -599,7 +599,7 @@ struct scheduler {
     // stop_stealing();
     // start_sleeping();
 
-    auto orig = wake_up_counter.load();
+    auto orig_val = wake_up_counter.load();
     num_awake_workers.fetch_sub(1);
 
     // DO ONE ROUND OF STEALS
@@ -640,7 +640,7 @@ struct scheduler {
       stop_stealing();
       start_sleeping();
 
-      parlay::atomic_wait(&wake_up_counter, orig);
+      parlay::atomic_wait(&wake_up_counter, orig_val);
       num_awake_workers.fetch_add(1);
 
       stop_sleeping();
