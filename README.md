@@ -2,7 +2,7 @@
 
 ## Experiments and Investigation of an Elastic Work Stealing Scheduler for Energy Savings
 
-### Advisor: [Prof. Samuel Westrick](https://cs.nyu.edu/~shw8119/)
+### Advisor: [Prof. Sam Westrick](https://cs.nyu.edu/~shw8119/)
 
 ### Introduction
 
