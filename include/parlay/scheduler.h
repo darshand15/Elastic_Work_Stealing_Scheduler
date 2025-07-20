@@ -612,7 +612,11 @@ struct scheduler {
     Job* job = nullptr;
     for (size_t i = 0; i <= YIELD_FACTOR * num_deques; i++) 
     {
-      // if (break_early()) return nullptr;
+      if (finished()) 
+      {
+        num_awake_workers.fetch_add(1);
+        return;
+      }
 
       job = try_steal(id);
 
@@ -631,21 +635,18 @@ struct scheduler {
         stop_working();
         start_stealing();
 
-        break;
+        return;
       } 
     }
 
-    if(!job)
-    {
-      stop_stealing();
-      start_sleeping();
+    stop_stealing();
+    start_sleeping();
 
-      parlay::atomic_wait(&wake_up_counter, orig_val);
-      num_awake_workers.fetch_add(1);
+    parlay::atomic_wait(&wake_up_counter, orig_val);
+    num_awake_workers.fetch_add(1);
 
-      stop_sleeping();
-      start_stealing();
-    }
+    stop_sleeping();
+    start_stealing();
     
   }
 
