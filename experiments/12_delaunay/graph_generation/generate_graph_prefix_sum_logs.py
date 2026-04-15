@@ -14,10 +14,18 @@ def read_logs_from_folder(folder_path, plot_name):
         line = line.strip()
         norm_factor = (int)(line)
 
+    w = []
+    with open("../Par_w_time.txt", "r") as w_file:
+        lines = w_file.readlines()
+        for line in lines:
+            line = line.strip()
+            w.append((int)(line))
+
     for filename in sorted(os.listdir(folder_path)):
         file_path = os.path.join(folder_path, filename)
         arr_data = []
         c_gt_sleep_dur = 0
+        fi = 0
 
         if os.path.isfile(file_path) and filename.lower().endswith((".log", ".txt")):
                 
@@ -33,14 +41,19 @@ def read_logs_from_folder(folder_path, plot_name):
 
                     if diff > sleep_estimate:
                         c_gt_sleep_dur += diff
+                        fi += (diff - sleep_estimate)
 
 
             ratio_pow_sav_feas = 0
+            ratio_pot_energy_sav = 0
             data_x = sorted(arr_data)
             prefix_sum_data_y = []
             
             if len(arr_data) != 0:
                 ratio_pow_sav_feas = round(((c_gt_sleep_dur - sleep_estimate)/sum(arr_data))*100, 2)
+                ti = sum(arr_data)
+                wi = w[i]
+                ratio_pot_energy_sav = (wi + ti)/(wi + ti - fi)
 
                 prefix_sum_data_y.append(data_x[0]/norm_factor)
                 for ind in range(1, len(data_x)):
@@ -58,7 +71,9 @@ def read_logs_from_folder(folder_path, plot_name):
             axs[i].set_xlabel('Duration (in ns)')
             axs[i].set_ylabel('Prefix_Sum(duration)')
             axs[i].axvline(x=sleep_estimate, color='r', linestyle='--', label=f'x={sleep_estimate}')
-            axs[i].set_title(str(num_threads[i]) + " Thread(s): " + str(ratio_pow_sav_feas) + "%" + " feasibility")
+            # axs[i].set_title(str(num_threads[i]) + " Thread(s): " + str(ratio_pow_sav_feas) + "%" + " feasibility")
+            axs[i].set_title(str(num_threads[i]) + " Thread(s): " + str(ratio_pot_energy_sav) + " feasibility")
+
 
             plt.suptitle('Prefix Sum Plot with Feasibility metric for Stop-Start Work Duration')                
 
