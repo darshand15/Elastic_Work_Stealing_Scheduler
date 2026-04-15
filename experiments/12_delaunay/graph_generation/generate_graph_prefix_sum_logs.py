@@ -55,6 +55,7 @@ def read_logs_from_folder(folder_path, plot_name):
                 ti = sum(arr_data)
                 wi = w[i]
                 ratio_pot_energy_sav = (wi + ti)/(wi + ti - fi)
+                ratio_pot_energy_sav = round(ratio_pot_energy_sav, 2)
 
                 prefix_sum_data_y.append(data_x[0]/norm_factor)
                 for ind in range(1, len(data_x)):

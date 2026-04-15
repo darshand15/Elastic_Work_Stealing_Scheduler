@@ -10,7 +10,7 @@ g++ -std=c++17 -I../../include/ -pthread ./src/mergesort.cpp -o par
 mv ./logs/w_pair.txt ./logs/w_pair_th_1.txt
 mv Results_all.txt ./gen_results_all/gen_results_all_th_1.txt
 mv Results_metrics.txt ./gen_results_metrics/gen_results_metrics_th_1.txt
-mv Par_w_time.txt Par_w_time_th_1.txt
+cp Par_w_time.txt Par_w_time_th_1.txt
 
 
 export PARLAY_NUM_THREADS=2
@@ -52,7 +52,7 @@ mv ./logs/w_pair.txt ./logs/w_pair_th_32.txt
 mv Results_all.txt ./gen_results_all/gen_results_all_th_32.txt
 mv Results_metrics.txt ./gen_results_metrics/gen_results_metrics_th_32.txt
 
-rm Par_w_time.txt
+# rm Par_w_time.txt
 cd graph_generation
 python3 ./generate_graph_ratio_metrics.py
 python3 ./generate_graph_prefix_sum_logs.py 44991
