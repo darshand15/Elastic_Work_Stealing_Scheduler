@@ -21,8 +21,9 @@ def read_logs_from_folder(folder_path, plot_name):
             line = line.strip()
             w.append((int)(line))
 
-    for filename in sorted(os.listdir(folder_path)):
+    for filename in sorted(os.listdir(folder_path), key=lambda x: int(x.split('_')[-1].split('.')[0])):
         file_path = os.path.join(folder_path, filename)
+        print(file_path)
         arr_data = []
         c_gt_sleep_dur = 0
         fi = 0

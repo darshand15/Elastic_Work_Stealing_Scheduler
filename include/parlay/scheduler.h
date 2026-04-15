@@ -331,7 +331,7 @@ struct scheduler {
 
     std::ofstream results_all("Results_all.txt");
     std::ofstream results_metrics("Results_metrics.txt");
-    std::ofstream par_w_time("Par_w_time.txt");
+    std::ofstream par_w_time("Par_w_time.txt", std::ios::app);
 
     // std::cout << "\n";
     for(int i = 0; i<num_threads; ++i)
