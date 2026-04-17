@@ -69,6 +69,8 @@ def read_logs_from_folder(folder_path, plot_name):
                 axs[i].plot(data_x, prefix_sum_data_y, marker='o')
             else:
                 axs[i].plot(data_x, prefix_sum_data_y)
+                axs[i].set_xscale('log')
+                axs[i].set_ylim(0,1)
                 
             axs[i].set_xlabel('Duration (in ns)')
             axs[i].set_ylabel('Prefix_Sum(duration)')
