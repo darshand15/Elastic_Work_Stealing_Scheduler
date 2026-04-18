@@ -13,7 +13,7 @@ for dir in */; do
         python3 ./generate_graph_prefix_sum_logs.py 44991
 
         # Go back to experiments/
-        cd ..
+        cd ../../
     else
         echo "Skipping $dir (no run_script.sh found)"
     fi
