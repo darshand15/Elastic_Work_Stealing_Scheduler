@@ -199,12 +199,12 @@ def read_logs_from_folder(folder_path, plot_name, sleep_estimate):
                 # Using a float for markevery (e.g., 0.2) places exactly 5 markers evenly spaced by *visual physical distance*
                 # rather than index. This prevents heavy cluttering and bunching at the ends of log-scaled axes.
                 ax_all.plot(data_x, prefix_sum_data_y, color=c, marker=m, linestyle=ls, markersize=5, alpha=0.8, markevery=0.2, label=plot_label)
-                # ax_all.set_xscale('log')
-                ax_all.set_xscale('symlog', linthresh=1e3)
+                ax_all.set_xscale('log')
+                # ax_all.set_xscale('symlog', linthresh=1e3)
                 if is_32_threads:
                     ax_32.plot(data_x, prefix_sum_data_y, color=c, marker=m, linestyle=ls, markersize=5, alpha=0.8, markevery=0.2, label=plot_label)
-                    # ax_32.set_xscale('log')
-                    ax_32.set_xscale('symlog', linthresh=1e3)
+                    ax_32.set_xscale('log')
+                    # ax_32.set_xscale('symlog', linthresh=1e3)
                 
         i += 1
     
