@@ -38,7 +38,7 @@
 //
 // Default: true
 #ifndef PARLAY_ELASTIC_PARALLELISM
-#define PARLAY_ELASTIC_PARALLELISM false
+#define PARLAY_ELASTIC_PARALLELISM true
 #endif
 
 
