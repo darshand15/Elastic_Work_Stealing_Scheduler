@@ -101,11 +101,16 @@ import matplotlib.pyplot as plt
 import sys
 
 def read_logs_from_folder(folder_path, plot_name, sleep_estimate):
-    # Create a single plot canvas instead of a 3x2 grid
+    # Create a single plot canvas
     fig, ax = plt.subplots(figsize=(12, 8))
     
     norm_factor = 1
     num_threads = [1, 2, 4, 8, 16, 32]
+    
+    # Define distinct colors (excluding red) and distinct shapes/linestyles
+    colors = ['blue', 'green', 'darkorange', 'purple', 'cyan', 'saddlebrown', 'magenta', 'olive', 'teal', 'navy']
+    markers = ['o', 's', '^', 'D', 'v', 'P', '*', 'X', '<', '>']
+    linestyles = ['-', '--', '-.', ':', '-', '--', '-.', ':', '-', '--']
     
     # Read norm factor
     with open("../Par_w_time_th_1.txt", "r") as norm_file:
@@ -175,20 +180,28 @@ def read_logs_from_folder(folder_path, plot_name, sleep_estimate):
             thread_label = num_threads[i] if i < len(num_threads) else f"File {i}"
             plot_label = f"{thread_label} Thread(s): {ratio_pot_energy_sav} feasibility"
 
-            # Plot on the single axis (ax) instead of axs[i]
+            # Select distinct styling for the current line
+            c = colors[i % len(colors)]
+            m = markers[i % len(markers)]
+            ls = linestyles[i % len(linestyles)]
+
+            # Plot on the single axis (ax) with unique shape and color
             if len(data_x) < 100:
-                ax.plot(data_x, prefix_sum_data_y, marker='o', label=plot_label)
+                ax.plot(data_x, prefix_sum_data_y, color=c, marker=m, linestyle=ls, markersize=6, label=plot_label)
             else:
-                ax.plot(data_x, prefix_sum_data_y, label=plot_label)
+                # Use markevery to show distinct shapes without overlapping densely packed points
+                me_val = max(1, len(data_x) // 15)
+                ax.plot(data_x, prefix_sum_data_y, color=c, marker=m, linestyle=ls, markersize=6, markevery=me_val, label=plot_label)
                 ax.set_xscale('log')
                 
         i += 1
     
     # Configure global plot settings
-    ax.set_xlabel('Duration (in ns)')
-    ax.set_ylabel('Prefix_Sum(duration)')
-    ax.axvline(x=sleep_estimate, color='r', linestyle='--', label=f'Threshold x={sleep_estimate}')
-    ax.set_title('Prefix Sum Plot with Feasibility metric for Stop-Start Work Duration')
+    ax.set_xlabel('Idle Duration (in ns)')
+    ax.set_ylabel('Work-Normalized Prefix_Sum of Idle Durations')
+    
+    # Red is strictly reserved for the vertical line here
+    ax.axvline(x=sleep_estimate, color='red', linestyle='--', linewidth=2, label=f'Sleep Estimate = {round(sleep_estimate/1000, 2)} µs')
     
     # Add a legend so we know which line represents which thread count
     ax.legend(loc='best')
