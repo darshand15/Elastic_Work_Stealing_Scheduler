@@ -101,8 +101,10 @@ import matplotlib.pyplot as plt
 import sys
 
 def read_logs_from_folder(folder_path, plot_name, sleep_estimate):
-    # Create a single plot canvas
-    fig, ax = plt.subplots(figsize=(12, 8))
+    # Create a plot canvas for all threads
+    fig_all, ax_all = plt.subplots(figsize=(12, 8))
+    # Create a separate plot canvas just for 32 threads
+    fig_32, ax_32 = plt.subplots(figsize=(12, 8))
     
     norm_factor = 1
     num_threads = [1, 2, 4, 8, 16, 32]
@@ -185,29 +187,48 @@ def read_logs_from_folder(folder_path, plot_name, sleep_estimate):
             m = markers[i % len(markers)]
             ls = linestyles[i % len(linestyles)]
 
-            # Plot on the single axis (ax) with unique shape and color
+            # Check if this iteration corresponds to 32 threads
+            is_32_threads = (i < len(num_threads) and num_threads[i] == 32)
+
+            # Plot on the all-threads axis (ax_all) and optionally on the 32-thread axis (ax_32)
             if len(data_x) < 100:
-                ax.plot(data_x, prefix_sum_data_y, color=c, marker=m, linestyle=ls, markersize=5, alpha=0.8, label=plot_label)
+                ax_all.plot(data_x, prefix_sum_data_y, color=c, marker=m, linestyle=ls, markersize=5, alpha=0.8, label=plot_label)
+                if is_32_threads:
+                    ax_32.plot(data_x, prefix_sum_data_y, color=c, marker=m, linestyle=ls, markersize=5, alpha=0.8, label=plot_label)
             else:
                 # Using a float for markevery (e.g., 0.2) places exactly 5 markers evenly spaced by *visual physical distance*
                 # rather than index. This prevents heavy cluttering and bunching at the ends of log-scaled axes.
-                ax.plot(data_x, prefix_sum_data_y, color=c, marker=m, linestyle=ls, markersize=5, alpha=0.8, markevery=0.2, label=plot_label)
-                ax.set_xscale('log')
+                ax_all.plot(data_x, prefix_sum_data_y, color=c, marker=m, linestyle=ls, markersize=5, alpha=0.8, markevery=0.2, label=plot_label)
+                ax_all.set_xscale('log')
+                if is_32_threads:
+                    ax_32.plot(data_x, prefix_sum_data_y, color=c, marker=m, linestyle=ls, markersize=5, alpha=0.8, markevery=0.2, label=plot_label)
+                    ax_32.set_xscale('log')
                 
         i += 1
     
-    # Configure global plot settings
-    ax.set_xlabel('Idle Duration (in ns)')
-    ax.set_ylabel('Work-Normalized Prefix_Sum of Idle Durations')
+    # Configure global plot settings for the unified plot
+    ax_all.set_xlabel('Idle Duration (in ns)')
+    ax_all.set_ylabel('Work-Normalized Prefix_Sum of Idle Durations')
     
     # Red is strictly reserved for the vertical line here
-    ax.axvline(x=sleep_estimate, color='red', linestyle='--', linewidth=2, label=f'Sleep Estimate = {round(sleep_estimate/1000, 2)} µs')
+    ax_all.axvline(x=sleep_estimate, color='red', linestyle='--', linewidth=2, label=f'Sleep Estimate = {round(sleep_estimate/1000, 2)} µs')
     
     # Add a legend so we know which line represents which thread count
-    ax.legend(loc='best')
+    ax_all.legend(loc='best')
     
-    plt.tight_layout()
-    plt.savefig(plot_name)
+    fig_all.tight_layout()
+    fig_all.savefig(plot_name)
+
+    # Configure and save the separate 32-threads plot
+    ax_32.set_xlabel('Idle Duration (in ns)')
+    ax_32.set_ylabel('Work-Normalized Prefix_Sum of Idle Durations')
+    ax_32.axvline(x=sleep_estimate, color='red', linestyle='--', linewidth=2, label=f'Sleep Estimate = {round(sleep_estimate/1000, 2)} µs')
+    # ax_32.set_title('Work-Normalized Prefix Sum of Idle Durations (32 Threads Only)')
+    ax_32.legend(loc='best')
+    
+    fig_32.tight_layout()
+    plot_32_name = plot_name.replace('.png', '_32T.png')
+    fig_32.savefig(plot_32_name)
 
 if __name__ == "__main__":
     if len(sys.argv) > 1:
