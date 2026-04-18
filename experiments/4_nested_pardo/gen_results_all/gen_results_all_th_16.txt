@@ -1,31 +1,31 @@
-Thread 0: 26280996029, 1262223277, 457323982
-Thread 1: 0, 23862290770, 4098223985
-Thread 2: 0, 23466651855, 4484133370
-Thread 3: 0, 23865859870, 4081988812
-Thread 4: 0, 23903120945, 4050002122
-Thread 5: 11035110100, 14956445977, 1979506620
-Thread 6: 0, 23673719178, 4282627623
-Thread 7: 0, 23564991532, 4356472995
-Thread 8: 0, 23372706586, 4587122782
-Thread 9: 0, 23770072099, 4179269617
-Thread 10: 10160706985, 15547984558, 2261945550
-Thread 11: 0, 23500434843, 4458773882
-Thread 12: 0, 23521958635, 4413543552
-Thread 13: 0, 23152439490, 4803562948
-Thread 14: 0, 23872748566, 4086728076
-Thread 15: 0, 24479144036, 3446875663
+Thread 0: 22648418922, 1136059, 70517
+Thread 1: 0, 9527649, 22638499672
+Thread 2: 0, 9452325, 22638495429
+Thread 3: 0, 9147889, 22638738050
+Thread 4: 0, 9666603, 22638129078
+Thread 5: 0, 9735759, 22637975585
+Thread 6: 0, 9671519, 22637972458
+Thread 7: 0, 9384695, 22638176936
+Thread 8: 15103595855, 11718185, 7532143181
+Thread 9: 0, 9795088, 22637618712
+Thread 10: 0, 9190111, 22638128053
+Thread 11: 0, 9689498, 22637563632
+Thread 12: 0, 9758694, 22637411505
+Thread 13: 0, 9687319, 22637395032
+Thread 14: 0, 9503770, 22637495903
+Thread 15: 0, 115, 22646929542
 
 Number of threads: 16
 
-Parallel Working Time: 47476813114 nanoseconds
-Parallel Stealing Time: 339772792217 nanoseconds
-Parallel Sleeping Time: 60028101579 nanoseconds
-Utilization: 0.106146
-Burn Ratio: 8.1566
-Successful Steal Ratio: 1.18613e-09
-Steal Pair Min: 1219
-Steal Pair Max: 56997565
-Steal Pair Avg: 645029
-num_th, W, St, Sl, Util, Succ_st_r, Burn_r, St_pair_min, St_pair_max, St_pair_avg: 16, 47476813114, 339772792217, 60028101579, 0.106146, 1.18613e-09, 8.1566, 1219, 56997565, 645029
-num_th, Util, Succ_st_r, Burn_r, St_pair_min, St_pair_max, St_pair_avg: 16, 0.106146, 1.18613e-09, 8.1566, 1219, 56997565, 645029
+Parallel Working Time: 37752014777 nanoseconds
+Parallel Stealing Time: 137065278 nanoseconds
+Parallel Sleeping Time: 324472743285 nanoseconds
+Utilization: 0.104183
+Burn Ratio: 1.00363
+Successful Steal Ratio: 2.90048e-06
+Steal Pair Min: 81
+Steal Pair Max: 774577
+Steal Pair Avg: 554920
+num_th, W, St, Sl, Util, Succ_st_r, Burn_r, St_pair_min, St_pair_max, St_pair_avg: 16, 37752014777, 137065278, 324472743285, 0.104183, 2.90048e-06, 1.00363, 81, 774577, 554920
+num_th, Util, Succ_st_r, Burn_r, St_pair_min, St_pair_max, St_pair_avg: 16, 0.104183, 2.90048e-06, 1.00363, 81, 774577, 554920
 

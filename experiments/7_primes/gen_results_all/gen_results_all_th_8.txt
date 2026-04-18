@@ -1,23 +1,23 @@
-Thread 0: 2808097987, 58755688, 47570456
-Thread 1: 2791888483, 62757872, 54543068
-Thread 2: 2753936726, 86622284, 61612286
-Thread 3: 2762928382, 125255384, 22525836
-Thread 4: 2800798849, 68411158, 43600446
-Thread 5: 2797732137, 59816250, 52434554
-Thread 6: 2801075162, 81643040, 30532253
-Thread 7: 2724307595, 97378823, 58970379
+Thread 0: 2350272511, 7554630, 102704
+Thread 1: 2341498308, 14071387, 1615743
+Thread 2: 2341107605, 14043472, 1925060
+Thread 3: 2339807246, 15291056, 1796081
+Thread 4: 2340452549, 14625350, 1679497
+Thread 5: 2341422440, 13917863, 1477684
+Thread 6: 2341944690, 13274805, 1452659
+Thread 7: 2341098866, 14544930, 1342678
 
 Number of threads: 8
 
-Parallel Working Time: 22240765321 nanoseconds
-Parallel Stealing Time: 640640499 nanoseconds
-Parallel Sleeping Time: 371789278 nanoseconds
-Utilization: 0.956461
-Burn Ratio: 1.0288
-Successful Steal Ratio: 0.00075169
-Steal Pair Min: 110
-Steal Pair Max: 13385279
-Steal Pair Avg: 113428
-num_th, W, St, Sl, Util, Succ_st_r, Burn_r, St_pair_min, St_pair_max, St_pair_avg: 8, 22240765321, 640640499, 371789278, 0.956461, 0.00075169, 1.0288, 110, 13385279, 113428
-num_th, Util, Succ_st_r, Burn_r, St_pair_min, St_pair_max, St_pair_avg: 8, 0.956461, 0.00075169, 1.0288, 110, 13385279, 113428
+Parallel Working Time: 18737604215 nanoseconds
+Parallel Stealing Time: 107323493 nanoseconds
+Parallel Sleeping Time: 11392106 nanoseconds
+Utilization: 0.993704
+Burn Ratio: 1.00573
+Successful Steal Ratio: 0.00417419
+Steal Pair Min: 77
+Steal Pair Max: 382257
+Steal Pair Avg: 24052.8
+num_th, W, St, Sl, Util, Succ_st_r, Burn_r, St_pair_min, St_pair_max, St_pair_avg: 8, 18737604215, 107323493, 11392106, 0.993704, 0.00417419, 1.00573, 77, 382257, 24052.8
+num_th, Util, Succ_st_r, Burn_r, St_pair_min, St_pair_max, St_pair_avg: 8, 0.993704, 0.00417419, 1.00573, 77, 382257, 24052.8
 
