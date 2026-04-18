@@ -102,9 +102,9 @@ import sys
 
 def read_logs_from_folder(folder_path, plot_name, sleep_estimate):
     # Create a plot canvas for all threads
-    fig_all, ax_all = plt.subplots(figsize=(12, 8))
+    fig_all, ax_all = plt.subplots(figsize=(8, 6))
     # Create a separate plot canvas just for 32 threads
-    fig_32, ax_32 = plt.subplots(figsize=(12, 8))
+    fig_32, ax_32 = plt.subplots(figsize=(8, 6))
     
     norm_factor = 1
     num_threads = [1, 2, 4, 8, 16, 32]
@@ -200,9 +200,11 @@ def read_logs_from_folder(folder_path, plot_name, sleep_estimate):
                 # rather than index. This prevents heavy cluttering and bunching at the ends of log-scaled axes.
                 ax_all.plot(data_x, prefix_sum_data_y, color=c, marker=m, linestyle=ls, markersize=5, alpha=0.8, markevery=0.2, label=plot_label)
                 ax_all.set_xscale('log')
+                # ax_all.set_xscale('symlog', linthresh=1e3)
                 if is_32_threads:
                     ax_32.plot(data_x, prefix_sum_data_y, color=c, marker=m, linestyle=ls, markersize=5, alpha=0.8, markevery=0.2, label=plot_label)
                     ax_32.set_xscale('log')
+                    # ax_32.set_xscale('symlog', linthresh=1e3)
                 
         i += 1
     
