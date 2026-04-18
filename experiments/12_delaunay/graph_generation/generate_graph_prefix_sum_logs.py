@@ -187,11 +187,11 @@ def read_logs_from_folder(folder_path, plot_name, sleep_estimate):
 
             # Plot on the single axis (ax) with unique shape and color
             if len(data_x) < 100:
-                ax.plot(data_x, prefix_sum_data_y, color=c, marker=m, linestyle=ls, markersize=6, label=plot_label)
+                ax.plot(data_x, prefix_sum_data_y, color=c, marker=m, linestyle=ls, markersize=5, alpha=0.8, label=plot_label)
             else:
-                # Use markevery to show distinct shapes without overlapping densely packed points
-                me_val = max(1, len(data_x) // 15)
-                ax.plot(data_x, prefix_sum_data_y, color=c, marker=m, linestyle=ls, markersize=6, markevery=me_val, label=plot_label)
+                # Using a float for markevery (e.g., 0.2) places exactly 5 markers evenly spaced by *visual physical distance*
+                # rather than index. This prevents heavy cluttering and bunching at the ends of log-scaled axes.
+                ax.plot(data_x, prefix_sum_data_y, color=c, marker=m, linestyle=ls, markersize=5, alpha=0.8, markevery=0.2, label=plot_label)
                 ax.set_xscale('log')
                 
         i += 1
