@@ -208,7 +208,7 @@ def read_logs_from_folder(folder_path, plot_name, sleep_estimate):
     
     # Configure global plot settings for the unified plot
     ax_all.set_xlabel('Idle Duration (in ns)')
-    ax_all.set_ylabel('Work-Normalized Prefix_Sum of Idle Durations')
+    ax_all.set_ylabel('Work-Normalized Prefix Sum of Idle Durations')
     
     # Red is strictly reserved for the vertical line here
     ax_all.axvline(x=sleep_estimate, color='red', linestyle='--', linewidth=2, label=f'Sleep Estimate = {round(sleep_estimate/1000, 2)} µs')
@@ -221,7 +221,7 @@ def read_logs_from_folder(folder_path, plot_name, sleep_estimate):
 
     # Configure and save the separate 32-threads plot
     ax_32.set_xlabel('Idle Duration (in ns)')
-    ax_32.set_ylabel('Work-Normalized Prefix_Sum of Idle Durations')
+    ax_32.set_ylabel('Work-Normalized Prefix Sum of Idle Durations')
     ax_32.axvline(x=sleep_estimate, color='red', linestyle='--', linewidth=2, label=f'Sleep Estimate = {round(sleep_estimate/1000, 2)} µs')
     # ax_32.set_title('Work-Normalized Prefix Sum of Idle Durations (32 Threads Only)')
     ax_32.legend(loc='best')
