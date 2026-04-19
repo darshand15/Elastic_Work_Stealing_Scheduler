@@ -154,7 +154,7 @@ def read_logs_from_folder(folder_path, plot_name, sleep_estimate):
                         fi += (diff - sleep_estimate)
 
             ratio_pow_sav_feas = 0
-            ratio_pot_energy_sav = 0
+            ratio_pot_energy_sav = 1
             data_x = sorted(arr_data)
             prefix_sum_data_y = []
             
