@@ -1,31 +1,31 @@
-Thread 0: 7596485188, 4122630, 391904
-Thread 1: 0, 6894955882, 693407372
-Thread 2: 0, 6891523659, 696375762
-Thread 3: 0, 6894829177, 693014376
-Thread 4: 0, 6896284813, 691145999
-Thread 5: 7597060760, 1353432, 137908
-Thread 6: 0, 6892298491, 697018813
-Thread 7: 0, 6901124503, 686307366
-Thread 8: 0, 6892767201, 694953382
-Thread 9: 0, 6889471517, 697793599
-Thread 10: 0, 6889237074, 697997644
-Thread 11: 0, 6898152662, 689423262
-Thread 12: 0, 6897856431, 689696568
-Thread 13: 0, 6892423970, 694110749
-Thread 14: 0, 6892486953, 694892427
-Thread 15: 0, 6893852096, 694781602
+Thread 0: 7628781732, 1041, 0
+Thread 1: 7597629614, 26526194, 2630072
+Thread 2: 0, 6921342596, 696568158
+Thread 3: 0, 6930731545, 685552599
+Thread 4: 0, 6917017802, 698971368
+Thread 5: 0, 6917593873, 698737906
+Thread 6: 0, 6924563801, 692147957
+Thread 7: 0, 6918326237, 697318826
+Thread 8: 0, 6915929722, 700227913
+Thread 9: 0, 6915603696, 699665543
+Thread 10: 0, 6919990029, 696067193
+Thread 11: 0, 6918030782, 697328800
+Thread 12: 0, 6932245805, 683744192
+Thread 13: 0, 6918828737, 696978024
+Thread 14: 0, 6914964253, 700707990
+Thread 15: 0, 6918549909, 698605411
 
 Number of threads: 16
 
-Parallel Working Time: 15193545948 nanoseconds
-Parallel Stealing Time: 96522740491 nanoseconds
-Parallel Sleeping Time: 9711448733 nanoseconds
-Utilization: 0.125124
-Burn Ratio: 7.35288
-Successful Steal Ratio: 1.96183e-09
-Steal Pair Min: 119670
-Steal Pair Max: 1116604
-Steal Pair Avg: 606158
-num_th, W, St, Sl, Util, Succ_st_r, Burn_r, St_pair_min, St_pair_max, St_pair_avg: 16, 15193545948, 96522740491, 9711448733, 0.125124, 1.96183e-09, 7.35288, 119670, 1116604, 606158
-num_th, Util, Succ_st_r, Burn_r, St_pair_min, St_pair_max, St_pair_avg: 16, 0.125124, 1.96183e-09, 7.35288, 119670, 1116604, 606158
+Parallel Working Time: 15226411346 nanoseconds
+Parallel Stealing Time: 96910246022 nanoseconds
+Parallel Sleeping Time: 9745251952 nanoseconds
+Utilization: 0.124928
+Burn Ratio: 7.36461
+Successful Steal Ratio: 1.95664e-09
+Steal Pair Min: 1041
+Steal Pair Max: 1477025
+Steal Pair Avg: 606983
+num_th, W, St, Sl, Util, Succ_st_r, Burn_r, St_pair_min, St_pair_max, St_pair_avg: 16, 15226411346, 96910246022, 9745251952, 0.124928, 1.95664e-09, 7.36461, 1041, 1477025, 606983
+num_th, Util, Succ_st_r, Burn_r, St_pair_min, St_pair_max, St_pair_avg: 16, 0.124928, 1.95664e-09, 7.36461, 1041, 1477025, 606983
 

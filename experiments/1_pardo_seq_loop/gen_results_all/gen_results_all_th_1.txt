@@ -1,8 +1,8 @@
-Thread 0: 15083357529, 0, 0
+Thread 0: 15131274633, 0, 0
 
 Number of threads: 1
 
-Parallel Working Time: 15083357529 nanoseconds
+Parallel Working Time: 15131274633 nanoseconds
 Parallel Stealing Time: 0 nanoseconds
 Parallel Sleeping Time: 0 nanoseconds
 Utilization: 1
@@ -11,6 +11,6 @@ Successful Steal Ratio: 0
 Steal Pair Min: 0
 Steal Pair Max: 0
 Steal Pair Avg: 0
-num_th, W, St, Sl, Util, Succ_st_r, Burn_r, St_pair_min, St_pair_max, St_pair_avg: 1, 15083357529, 0, 0, 1, 0, 1, 0, 0, 0
+num_th, W, St, Sl, Util, Succ_st_r, Burn_r, St_pair_min, St_pair_max, St_pair_avg: 1, 15131274633, 0, 0, 1, 0, 1, 0, 0, 0
 num_th, Util, Succ_st_r, Burn_r, St_pair_min, St_pair_max, St_pair_avg: 1, 1, 0, 1, 0, 0, 0
 
