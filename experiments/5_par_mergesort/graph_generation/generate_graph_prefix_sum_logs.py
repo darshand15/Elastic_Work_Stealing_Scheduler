@@ -352,17 +352,17 @@ def read_logs_from_folder(folder_path, plot_name, sleep_estimate):
     # ---------------------------------------------------------
     # Configure global plot settings for the unified plot
     # ---------------------------------------------------------
-    ax_all.set_xlabel('Idle Duration (in ns)', fontsize=16)
-    ax_all.set_ylabel('Work-Normalized Prefix Sum of Idle Durations', fontsize=16)
+    ax_all.set_xlabel('Idle Duration (in ns)', fontsize=17)
+    ax_all.set_ylabel('Work-Normalized Prefix Sum of Idle Durations', fontsize=17)
     
     # Increase the size of the axis tick markers (the numbers on the x and y axis)
-    ax_all.tick_params(axis='both', which='major', labelsize=14)
+    ax_all.tick_params(axis='both', which='major', labelsize=15)
     
     # Red is strictly reserved for the vertical line here
     ax_all.axvline(x=sleep_estimate, color='red', linestyle='--', linewidth=2, label=f'Sleep Estimate = {round(sleep_estimate/1000, 2)} µs')
     
     # Add a legend so we know which line represents which thread count, with larger font
-    ax_all.legend(loc='best', fontsize=14)
+    ax_all.legend(loc='best', fontsize=16)
     
     fig_all.tight_layout()
     fig_all.savefig(plot_name)
@@ -370,15 +370,15 @@ def read_logs_from_folder(folder_path, plot_name, sleep_estimate):
     # ---------------------------------------------------------
     # Configure and save the separate 32-threads plot
     # ---------------------------------------------------------
-    ax_32.set_xlabel('Idle Duration (in ns)', fontsize=16)
-    ax_32.set_ylabel('Work-Normalized Prefix Sum of Idle Durations', fontsize=16)
+    ax_32.set_xlabel('Idle Duration (in ns)', fontsize=17)
+    ax_32.set_ylabel('Work-Normalized Prefix Sum of Idle Durations', fontsize=17)
     
     # Increase the size of the axis tick markers
-    ax_32.tick_params(axis='both', which='major', labelsize=14)
+    ax_32.tick_params(axis='both', which='major', labelsize=15)
     
     ax_32.axvline(x=sleep_estimate, color='red', linestyle='--', linewidth=2, label=f'Sleep Estimate = {round(sleep_estimate/1000, 2)} µs')
     
-    ax_32.legend(loc='best', fontsize=14)
+    ax_32.legend(loc='best', fontsize=16)
     
     fig_32.tight_layout()
     plot_32_name = plot_name.replace('.png', '_32T.png')
